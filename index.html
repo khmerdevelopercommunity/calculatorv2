@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ម៉ាស៊ីនគិតលេខខ្មែរ | Khmer Calculator</title>
+  <!-- Google Font for Khmer -->
+  <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* reset & base */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Kantumruy Pro', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      /* free stock background image: subtle khmer pattern / temple silhouette */
+      background-image: url('https://images.pexels.com/photos/1583339/pexels-photo-1583339.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-color: #2c1e0e; /* fallback */
+      backdrop-filter: blur(1px);
+    }
+
+    /* overlay for better readability */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 0;
+    }
+
+    /* all direct children of body sit above overlay */
+    nav, main, footer {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ----- NAVIGATION (flex) ----- */
+    nav {
+      background: rgba(30, 20, 10, 0.85);
+      backdrop-filter: blur(8px);
+      padding: 0.8rem 2rem;
+      border-bottom: 3px solid #d4af37; /* golden accent */
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    }
+
+    nav ul {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      list-style: none;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+    }
+
+    nav li {
+      font-size: 1.2rem;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: #f5e7d3;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      padding: 0.5rem 0.2rem;
+      transition: all 0.2s ease;
+      border-bottom: 2px solid transparent;
+    }
+
+    nav a:hover {
+      color: #ffd966;
+      border-bottom: 2px solid #d4af37;
+      transform: translateY(-2px);
+    }
+
+    /* ----- MAIN (calculator) ----- */
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    .calculator {
+      background: rgba(245, 235, 220, 0.92);
+      backdrop-filter: blur(12px);
+      width: 100%;
+      max-width: 420px;
+      padding: 1.8rem 1.5rem 2rem;
+      border-radius: 32px;
+      box-shadow: 0 25px 40px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 215, 0, 0.3);
+      border: 1px solid #d4af37;
+    }
+
+    .calc-title {
+      text-align: center;
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: #3e2c1b;
+      margin-bottom: 0.8rem;
+      letter-spacing: 1px;
+      text-shadow: 2px 2px 0 rgba(212, 175, 55, 0.2);
+    }
+
+    .calc-title small {
+      font-size: 0.9rem;
+      display: block;
+      font-weight: 400;
+      color: #5a3e2b;
+      margin-top: 0.2rem;
+    }
+
+    .display {
+      background: #1e1a16;
+      color: #f8eedb;
+      font-size: 2.4rem;
+      font-weight: 600;
+      text-align: right;
+      padding: 0.8rem 1.2rem;
+      border-radius: 24px;
+      margin-bottom: 1.6rem;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      letter-spacing: 1px;
+      border: 2px solid #d4af37;
+      box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.6);
+      font-family: 'Kantumruy Pro', sans-serif;
+      min-height: 5rem;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.8rem;
+    }
+
+    .btn {
+      background: #fff3e0;
+      border: none;
+      border-radius: 20px;
+      padding: 0.9rem 0.2rem;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #2e1f12;
+      cursor: pointer;
+      box-shadow: 0 5px 0 #b3926b, 0 8px 12px rgba(0, 0, 0, 0.25);
+      transition: all 0.08s linear;
+      font-family: 'Kantumruy Pro', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 215, 0, 0.5);
+      user-select: none;
+    }
+
+    .btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 #b3926b, 0 5px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    /* operator buttons */
+    .btn.operator {
+      background: #d4af37;
+      color: #1e1a16;
+      box-shadow: 0 5px 0 #8b6f3a, 0 8px 12px rgba(0, 0, 0, 0.25);
+      font-weight: 700;
+    }
+
+    .btn.operator:active {
+      box-shadow: 0 1px 0 #8b6f3a, 0 5px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn.clear {
+      background: #a0522d;
+      color: #fff3e0;
+      box-shadow: 0 5px 0 #5e2e1a, 0 8px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn.clear:active {
+      box-shadow: 0 1px 0 #5e2e1a, 0 5px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn.equals {
+      background: #2e7d32;
+      color: white;
+      box-shadow: 0 5px 0 #1b4d1f, 0 8px 12px rgba(0, 0, 0, 0.25);
+      grid-column: span 2;
+    }
+
+    .btn.equals:active {
+      box-shadow: 0 1px 0 #1b4d1f, 0 5px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    /* ----- FOOTER (flex) ----- */
+    footer {
+      background: rgba(30, 20, 10, 0.9);
+      backdrop-filter: blur(8px);
+      color: #d9c8b2;
+      text-align: center;
+      padding: 1.2rem 1rem;
+      border-top: 3px solid #d4af37;
+      font-size: 0.95rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 0.8rem 2rem;
+      box-shadow: 0 -6px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    footer span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    footer i {
+      font-style: normal;
+      color: #d4af37;
+      font-weight: 600;
+    }
+
+    /* responsiveness */
+    @media (max-width: 480px) {
+      nav ul {
+        gap: 1rem;
+      }
+      nav a {
+        font-size: 1rem;
+      }
+      .calculator {
+        padding: 1.2rem 1rem;
+      }
+      .display {
+        font-size: 2rem;
+        padding: 0.6rem 1rem;
+      }
+      .btn {
+        font-size: 1.3rem;
+        padding: 0.7rem 0.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV with <ul> <li> <a> + flex -->
+  <nav>
+    <ul>
+      <li><a href="#">ទំព័រដើម</a></li>
+      <li><a href="#">អំពីយើង</a></li>
+      <li><a href="#">សេវាកម្ម</a></li>
+      <li><a href="#">ទំនាក់ទំនង</a></li>
+    </ul>
+  </nav>
+
+  <!-- MAIN with Khmer calculator -->
+  <main>
+    <div class="calculator">
+      <div class="calc-title">
+        ម៉ាស៊ីនគិតលេខខ្មែរ
+        <small>គណនាលេខយ៉ាងរហ័ស</small>
+      </div>
+
+      <!-- display area -->
+      <div class="display" id="display">0</div>
+
+      <!-- buttons grid (khmer digits & operations) -->
+      <div class="buttons">
+        <!-- row 1 -->
+        <button class="btn clear" id="clear">លុប</button>
+        <button class="btn operator" data-op="÷">÷</button>
+        <button class="btn operator" data-op="×">×</button>
+        <button class="btn operator" data-op="−">−</button>
+        <!-- row 2 -->
+        <button class="btn" data-num="7">៧</button>
+        <button class="btn" data-num="8">៨</button>
+        <button class="btn" data-num="9">៩</button>
+        <button class="btn operator" data-op="+">+</button>
+        <!-- row 3 -->
+        <button class="btn" data-num="4">៤</button>
+        <button class="btn" data-num="5">៥</button>
+        <button class="btn" data-num="6">៦</button>
+        <button class="btn" data-num="1">១</button>
+        <!-- row 4 -->
+        <button class="btn" data-num="2">២</button>
+        <button class="btn" data-num="3">៣</button>
+        <button class="btn" data-num="0">០</button>
+        <button class="btn" data-num=".">.</button>
+        <!-- row 5: equals spans 2 cols, plus backspace? we add backspace also in the grid -->
+        <button class="btn equals" id="equals">ស្មើ</button>
+        <button class="btn" id="backspace">⌫</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER with flex -->
+  <footer>
+    <span>© ២០២៥ ម៉ាស៊ីនគិតលេខខ្មែរ</span>
+    <span>📞 <i>ទំនាក់ទំនង</i> ០១២ ៣៤៥ ៦៧៨</span>
+    <span>🇰🇭 ភាសាខ្មែរ</span>
+  </footer>
+
+  <!-- JavaScript for calculator -->
+  <script>
+    (function() {
+      const display = document.getElementById('display');
+      let currentInput = '0';
+      let shouldResetDisplay = false;
+      let firstOperand = null;
+      let operator = null;
+      let waitingForSecondOperand = false;
+
+      // Helper: map khmer digit to arabic for calculation
+      function khmerToArabic(khmer) {
+        const map = {
+          '០': '0', '១': '1', '២': '2', '៣': '3', '៤': '4',
+          '៥': '5', '៦': '6', '៧': '7', '៨': '8', '៩': '9'
+        };
+        return map[khmer] || khmer;
+      }
+
+      // Helper: convert arabic digit string to khmer digits for display
+      function arabicToKhmer(arabicStr) {
+        const map = {
+          '0': '០', '1': '១', '2': '២', '3': '៣', '4': '៤',
+          '5': '៥', '6': '៦', '7': '៧', '8': '៨', '9': '៩'
+        };
+        return arabicStr.replace(/[0-9]/g, (d) => map[d] || d);
+      }
+
+      // Update display with khmer representation
+      function updateDisplay(value) {
+        // value is a string that may contain arabic digits, operators, etc.
+        // For display, convert digits to khmer, but keep operators and dots.
+        const khmerDisplay = value.replace(/[0-9]/g, (d) => {
+          const map = {
+            '0': '០', '1': '១', '2': '២', '3': '៣', '4': '៤',
+            '5': '៥', '6': '៦', '7': '៧', '8': '៨', '9': '៩'
+          };
+          return map[d] || d;
+        });
+        display.textContent = khmerDisplay;
+      }
+
+      // Convert display text (khmer or arabic) to a raw arabic number string for internal use
+      function getRawNumber(str) {
+        // replace khmer digits with arabic
+        return str.replace(/[០-៩]/g, (khmer) => {
+          const map = {
+            '០': '0', '១': '1', '២': '2', '៣': '3', '៤': '4',
+            '៥': '5', '៦': '6', '៧': '7', '៨': '8', '៩': '9'
+          };
+          return map[khmer] || khmer;
+        });
+      }
+
+      // Reset calculator state
+      function resetCalculator() {
+        currentInput = '0';
+        firstOperand = null;
+        operator = null;
+        waitingForSecondOperand = false;
+        shouldResetDisplay = false;
+        updateDisplay('0');
+      }
+
+      // Handle number input (data-num is khmer digit or dot)
+      function inputNumber(num) {
+        // if waiting for second operand or should reset, clear display
+        if (waitingForSecondOperand) {
+          currentInput = num;
+          waitingForSecondOperand = false;
+        } else if (shouldResetDisplay) {
+          currentInput = num;
+          shouldResetDisplay = false;
+        } else {
+          // avoid multiple dots
+          if (num === '.' && currentInput.includes('.')) return;
+          if (currentInput === '0' && num !== '.') {
+            currentInput = num;
+          } else {
+            currentInput += num;
+          }
+        }
+        updateDisplay(currentInput);
+      }
+
+      // Handle operator
+      function handleOperator(op) {
+        const inputValue = getRawNumber(currentInput); // arabic string
+        const inputFloat = parseFloat(inputValue);
+
+        if (operator && waitingForSecondOperand) {
+          // just replace operator
+          operator = op;
+          return;
+        }
+
+        if (firstOperand === null && !isNaN(inputFloat)) {
+          firstOperand = inputFloat;
+          waitingForSecondOperand = true;
+          operator = op;
+          shouldResetDisplay = true;
+        } else if (operator) {
+          // perform calculation
+          const result = calculate(firstOperand, inputFloat, operator);
+          if (result === null) return; // division by zero etc
+          firstOperand = result;
+          // show result in display
+          currentInput = String(result);
+          updateDisplay(currentInput);
+          waitingForSecondOperand = true;
+          operator = op;
+          shouldResetDisplay = true;
+        }
+      }
+
+      // Calculate function
+      function calculate(a, b, op) {
+        switch (op) {
+          case '+': return a + b;
+          case '−': return a - b;
+          case '×': return a * b;
+          case '÷': return b === 0 ? null : a / b;
+          default: return b;
+        }
+      }
+
+      // Handle equals
+      function handleEquals() {
+        if (operator === null || waitingForSecondOperand) {
+          // if no operator, just keep current
+          return;
+        }
+        const inputValue = getRawNumber(currentInput);
+        const inputFloat = parseFloat(inputValue);
+        const result = calculate(firstOperand, inputFloat, operator);
+        if (result === null) {
+          updateDisplay('មិនអាចចែកនឹងសូន្យ');
+          firstOperand = null;
+          operator = null;
+          waitingForSecondOperand = false;
+          shouldResetDisplay = true;
+          currentInput = '0';
+          return;
+        }
+        // format result: remove trailing zeros, limit decimals
+        let resultStr = String(result);
+        if (resultStr.includes('.')) {
+          resultStr = resultStr.replace(/\.?0+$/, '');
+        }
+        // handle large numbers / decimals gracefully
+        currentInput = resultStr;
+        updateDisplay(currentInput);
+        firstOperand = result;
+        operator = null;
+        waitingForSecondOperand = false;
+        shouldResetDisplay = true;
+      }
+
+      // Backspace
+      function handleBackspace() {
+        if (shouldResetDisplay || waitingForSecondOperand) {
+          // if we are in result state, reset to 0
+          currentInput = '0';
+          shouldResetDisplay = false;
+          waitingForSecondOperand = false;
+          updateDisplay(currentInput);
+          return;
+        }
+        if (currentInput.length === 1 || (currentInput.length === 2 && currentInput.startsWith('-'))) {
+          currentInput = '0';
+        } else {
+          currentInput = currentInput.slice(0, -1);
+        }
+        updateDisplay(currentInput);
+      }
+
+      // Clear all
+      function handleClear() {
+        resetCalculator();
+      }
+
+      // Event listeners
+      document.querySelectorAll('[data-num]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const num = e.target.getAttribute('data-num');
+          inputNumber(num);
+        });
+      });
+
+      document.querySelectorAll('[data-op]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const op = e.target.getAttribute('data-op');
+          handleOperator(op);
+        });
+      });
+
+      document.getElementById('equals').addEventListener('click', handleEquals);
+      document.getElementById('clear').addEventListener('click', handleClear);
+      document.getElementById('backspace').addEventListener('click', handleBackspace);
+
+      // initialize display
+      updateDisplay('0');
+
+      // add keyboard support (optional but nice)
+      window.addEventListener('keydown', (e) => {
+        if (e.key >= '0' && e.key <= '9') {
+          inputNumber(e.key);
+          e.preventDefault();
+        } else if (e.key === '.') {
+          inputNumber('.');
+          e.preventDefault();
+        } else if (e.key === '+' || e.key === '-' || e.key === '*' || e.key === '/') {
+          const opMap = { '+': '+', '-': '−', '*': '×', '/': '÷' };
+          handleOperator(opMap[e.key]);
+          e.preventDefault();
+        } else if (e.key === 'Enter' || e.key === '=') {
+          handleEquals();
+          e.preventDefault();
+        } else if (e.key === 'Backspace') {
+          handleBackspace();
+          e.preventDefault();
+        } else if (e.key === 'Escape' || e.key === 'c' || e.key === 'C') {
+          handleClear();
+          e.preventDefault();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
